@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+    <title>Chatting</title>
+</head>
+
+<body>
+    <div class="flex flex-col  h-screen w-full">
+        <div class="flex items-center justify-center bg-indigo-500">
+            <input type="text" id="nickname"
+            placeholder="You Name"
+            class="flex w-500 border  mt-5 rounded-xl focus:outline-none focus:border-indigo-300 pl-4 h-10" />
+
+        </div>
+        <h5 class="flex items-center justify-center bg-indigo-500 text-white font-bold"><span id="totalUserOnline"></span> &nbsp; Online<div class="text-green-300">*</div></h5>
+        <div id="chat" class="flex h-screen flex-col  flex-col-reverse overflow-y-scroll ">
+            <div id="message-list"></div>
+        </div>
+        <div class="flex flex-row mb-10 items-center h-16 rounded-xl bg-white w-full px-4">
+
+            <div class="flex-grow ml-4">
+                <div class="relative w-full">
+                    <input type="text" id="message"
+                    placeholder="Type you message..."
+                        class="flex w-full border rounded-xl focus:outline-none focus:border-indigo-300 pl-4 h-10" />
+
+                </div>
+            </div>
+            <div class="ml-4">
+                <button id="sendMessage"
+                    class="flex items-center focus:outline-none justify-center bg-indigo-500 hover:bg-indigo-600 rounded-xl text-white px-4 py-1 flex-shrink-0">
+                    <span>Send</span>
+                    <span class="ml-2">
+                        <svg class="w-4 h-4 transform rotate-45 -mt-px" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+</body>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    var socket = io()
+
+    socket.emit('join')
+    socket.on('message', (param) => {
+        document.getElementById('message').value = '';
+        $("#message-list").append(`
+        <div class="mt-5 mb-5">
+            <div class="ml-5"> ${param.nick}</div>
+            <div  class="ml-5 rounded-bl-none float-none bg-gray-300 rounded-2xl p-3 w-1/2">
+                ${param.text}
+            </div>
+        </div>
+        `)
+    })
+    socket.on('UserOnline', (UserOnline) => {
+        $("#totalUserOnline").text(UserOnline)
+    })
+    $("#sendMessage").click(() => {
+        let cekmes = document.getElementById('message').value;
+        let ceknic = document.getElementById('nickname').value;
+        if (cekmes == '') {
+            alert('You must type message !')
+        } else if( ceknic == ''){
+            alert('You must type nickname !')
+        }
+        else {
+            socket.emit('message', {
+                text: $("#message").val(),
+                nick: $("#nickname").val()
+            })
+        }
+    })
+</script>
+
+</html>
